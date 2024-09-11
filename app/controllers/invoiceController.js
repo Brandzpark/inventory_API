@@ -2,6 +2,7 @@ const InvoiceService = require('../services/InvoiceService')
 
 const {
   createValidationSchema,
+  createWithPaymentValidationSchema,
   updateValidationSchema,
   deleteValidationSchema,
 } = require('../validations/invoiceValidation')
@@ -34,7 +35,12 @@ exports.findById = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    await global.validate(createValidationSchema, req);
+    if (req?.body?.payment) {
+      await global.validate(createWithPaymentValidationSchema, req);
+    }
+    if (!req?.body?.payment) {
+      await global.validate(createValidationSchema, req);
+    }
     const response = await InvoiceService.create(req.body, req.user);
     res.status(200).json({
       status: 200,

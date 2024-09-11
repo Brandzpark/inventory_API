@@ -21,26 +21,19 @@ const invoicePaymentSchema = new Schema(
       type: String,
     },
     bank: {
-      name: {
-        type: String,
-      },
-      branch: {
-        type: String,
-      },
-      date: {
-        type: Date,
+      type: Schema.Types.Mixed,
+      default: null,
+      set: function (value) {
+        return value === undefined || value === null ? null : value;
       }
     },
-    default: null,
     cheque: {
-      number: {
-        type: String,
-      },
-      date: {
-        type: Date,
+      type: Schema.Types.Mixed,
+      default: null,
+      set: function (value) {
+        return value === undefined || value === null ? null : value;
       }
     },
-    default: null,
     remark: {
       type: String,
     },

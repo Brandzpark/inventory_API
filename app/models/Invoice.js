@@ -53,22 +53,27 @@ const invoiceSchema = new Schema(
     deliveryDate: {
       type: Date,
     },
-    isFreeIssue: {
-      type: Boolean,
-      default: false,
-    },
-    customerNote: {
+    customerCode: {
       type: String,
     },
-    customerCode: {
+    address: {
       type: String,
     },
     salesRepCode: {
       type: String,
     },
-    items: [itemsSchema],
-    remark: {
+    type: {
       type: String,
+    },
+    customerRemark: {
+      type: String,
+    },
+    customerRemarkFreeItems: {
+      type: String,
+    },
+    hasFreeIssueItems: {
+      type: Boolean,
+      default: false,
     },
     totalDiscount: {
       type: String,
@@ -85,10 +90,19 @@ const invoiceSchema = new Schema(
     total: {
       type: String,
     },
+    items: [itemsSchema],
     deletedAt: {
       type: Date,
       default: null
-    }
+    },
+    remainingAmount: {
+      type: String,
+    },
+    status: {
+      type: String,
+      default: "pending"
+    },
+    history: [],
   },
   {
     timestamps: true,
