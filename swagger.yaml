@@ -1,0 +1,1200 @@
+openapi: 3.0.0
+info:
+  title: inventory_system
+  version: 1.0.0
+servers:
+  - url: http://invsystem.ap-southeast-1.elasticbeanstalk.com
+  - url: http://localhost:4015
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+tags:
+  - name: User
+  - name: Role
+  - name: Supplier
+  - name: Sales Rep
+  - name: Customer
+  - name: Product
+  - name: Purchase Order
+  - name: Purchase Order Recived
+  - name: Purchase Order Return Stock
+paths:
+  /users/login:
+    post:
+      tags:
+        - User
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: yohandal@gmail.com
+                password: 123admin
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /users/me:
+    get:
+      tags:
+        - User
+      summary: Me
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /users/register:
+    post:
+      tags:
+        - User
+      summary: Register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                firstName: Yohan
+                lastName: Dalpethadu
+                email: yohandal@gmail.com
+                password: 123admin
+                role: Admin
+                permissions:
+                  - users.create
+                  - users.update
+                  - users.delete
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /roles/all:
+    get:
+      tags:
+        - Role
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /roles/create:
+    post:
+      tags:
+        - Role
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Admin3
+                permissions:
+                  - users.create
+                  - users.update
+                  - users.delete
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /roles/update:
+    put:
+      tags:
+        - Role
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                _id: 66b0bb3dd80272603b640f6c
+                name: Admin
+                permissions:
+                  - users.create
+                  - users.update
+                  - users.delete
+                  - vendor.create
+                  - vendor.update
+                  - vendor.delete
+                deletedAt: null
+                createdAt: '2024-08-05T11:45:01.480Z'
+                updatedAt: '2024-08-05T11:45:01.480Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /roles/destroy:
+    post:
+      tags:
+        - Role
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Admin5
+                permissions:
+                  - users.create
+                  - users.update
+                  - users.delete
+                deletedAt: null
+                _id: 66b0bbfc5cbad49e397a5923
+                createdAt: '2024-08-05T11:48:12.841Z'
+                updatedAt: '2024-08-05T11:48:12.841Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /suppliers/all:
+    get:
+      tags:
+        - Supplier
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /suppliers/findById/{id}:
+    get:
+      tags:
+        - Supplier
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66c4fad16a4048e46ce42035
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /suppliers/create:
+    post:
+      tags:
+        - Supplier
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SUP0001
+                salutation: MR
+                name: ABC Company
+                email: abc@test.com
+                mobileNumber: '0711231238'
+                address: no 123 test road test
+                nic: '123123123'
+                taxNo: ADEAWE123192837KJHKJ
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /suppliers/update:
+    put:
+      tags:
+        - Supplier
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SUP0001
+                salutation: MR
+                name: ABC Company
+                email: abc@test.com
+                mobileNumber: '0711231238'
+                address: no 123 test road test
+                nic: '123123123'
+                taxNo: ADEAWE123192837KJHKJ
+                deletedAt: null
+                _id: 66c5023bc7a4629bb9460acf
+                createdAt: '2024-08-20T20:53:15.863Z'
+                updatedAt: '2024-08-20T20:53:15.863Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /suppliers/destroy:
+    post:
+      tags:
+        - Supplier
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SUP0001
+                salutation: MR
+                name: ABC Company
+                email: abc@test.com
+                mobileNumber: '0711231238'
+                address: no 123 test road test
+                nic: '123123123'
+                taxNo: ADEAWE123192837KJHKJ
+                deletedAt: null
+                _id: 66c5023bc7a4629bb9460acf
+                createdAt: '2024-08-20T20:53:15.863Z'
+                updatedAt: '2024-08-20T20:53:15.863Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /salesRep/all:
+    get:
+      tags:
+        - Sales Rep
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /salesRep/findById/{id}:
+    get:
+      tags:
+        - Sales Rep
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66c4fad16a4048e46ce42035
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /salesRep/create:
+    post:
+      tags:
+        - Sales Rep
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SALESR0001
+                salutation: MR
+                name: Rep Test
+                email: abc@test.com
+                mobileNumber: '0711231238'
+                address: no 123 test road test
+                nic: '123123123'
+                taxNo: ADEAWE123192837KJHKJ
+                customers:
+                  - _id: 66c50275c7a4629bb9460ada
+                    code: CUS002
+                    salutation: MR
+                    name: Test Customer updated
+                    email: textcus@test.com
+                    nic: 871274822v
+                    mobileNumber: '0711231238'
+                    address: no 123 test rd test colombo
+                    taxNo: '100123123123123123'
+                    openingBalance: '25000'
+                    creditLimit: '100000'
+                    creditPeriod: '30'
+                    deletedAt: '2024-08-20T20:54:48.625Z'
+                    createdAt: '2024-08-20T20:54:13.395Z'
+                    updatedAt: '2024-08-20T20:54:48.625Z'
+                    __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /salesRep/update:
+    put:
+      tags:
+        - Sales Rep
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SALESR0001
+                salutation: MR
+                name: Rep Test updated
+                email: abc@test.com
+                address: no 123 test road test
+                mobileNumber: '0711231238'
+                nic: '123123123'
+                taxNo: ADEAWE123192837KJHKJ
+                customers:
+                  - _id: 66c50275c7a4629bb9460ada
+                    code: CUS002
+                    salutation: MR
+                    name: Test Customer updated
+                    email: textcus@test.com
+                    nic: 871274822v
+                    mobileNumber: '0711231238'
+                    address: no 123 test rd test colombo
+                    taxNo: '100123123123123123'
+                    openingBalance: '25000'
+                    creditLimit: '100000'
+                    creditPeriod: '30'
+                    deletedAt: '2024-08-20T20:54:48.625Z'
+                    createdAt: '2024-08-20T20:54:13.395Z'
+                    updatedAt: '2024-08-20T20:54:48.625Z'
+                    __v: 0
+                deletedAt: null
+                _id: 66c502c5c7a4629bb9460ae7
+                createdAt: '2024-08-20T20:55:33.061Z'
+                updatedAt: '2024-08-20T20:55:33.061Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /salesRep/destroy:
+    post:
+      tags:
+        - Sales Rep
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SUP0001
+                salutation: MR
+                name: ABC Company Updated
+                email: abc@test.com
+                mobileNumber: '0711231238'
+                address: no 123 test road test
+                nic: '123123123'
+                taxNo: ADEAWE123192837KJHKJ
+                deletedAt: null
+                _id: 66c4fad16a4048e46ce42035
+                createdAt: '2024-08-20T20:21:37.128Z'
+                updatedAt: '2024-08-20T20:21:37.128Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /customers/all:
+    get:
+      tags:
+        - Customer
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /customers/findById/{id}:
+    get:
+      tags:
+        - Customer
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66b23beebee9c27d6a378e1d
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /customers/create:
+    post:
+      tags:
+        - Customer
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: CUS002
+                salutation: MR
+                name: Test Customer
+                email: textcus@test.com
+                nic: 871274822v
+                mobileNumber: '0711231238'
+                address: no 123 test rd test colombo
+                taxNo: '100123123123123123'
+                openingBalance: '25000'
+                creditLimit: '100000'
+                creditPeriod: '30'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /customers/update:
+    put:
+      tags:
+        - Customer
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: CUS002
+                salutation: MR
+                name: Test Customer updated
+                email: textcus@test.com
+                nic: 871274822v
+                mobileNumber: '0711231238'
+                address: no 123 test rd test colombo
+                taxNo: '100123123123123123'
+                openingBalance: '25000'
+                creditLimit: '100000'
+                creditPeriod: '30'
+                deletedAt: null
+                _id: 66c50275c7a4629bb9460ada
+                createdAt: '2024-08-20T20:54:13.395Z'
+                updatedAt: '2024-08-20T20:54:13.395Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /customers/destroy:
+    post:
+      tags:
+        - Customer
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: CUS002
+                salutation: MR
+                name: Test Customer updated
+                email: textcus@test.com
+                nic: 871274822v
+                mobileNumber: '0711231238'
+                address: no 123 test rd test colombo
+                taxNo: '100123123123123123'
+                openingBalance: '25000'
+                creditLimit: '100000'
+                creditPeriod: '30'
+                deletedAt: null
+                _id: 66c50275c7a4629bb9460ada
+                createdAt: '2024-08-20T20:54:13.395Z'
+                updatedAt: '2024-08-20T20:54:13.395Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/all:
+    get:
+      tags:
+        - Product
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/findById/{id}:
+    get:
+      tags:
+        - Product
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66b245c188676d9fe3dbeeb6
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/create:
+    post:
+      tags:
+        - Product
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SKU-00002
+                name: Iron Bar2
+                department: Iron
+                category: Iron
+                isActive: true
+                unit: g
+                weight: '200'
+                manufacturer: Test Iron Works
+                brand: test
+                price: '1000'
+                cost: '800'
+                discount: '5'
+                warehouseQuantity:
+                  - warehouse: Default
+                    quantity: 1
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/stockAdjestment:
+    post:
+      tags:
+        - Product
+      summary: Stock adjustment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                date: '2024-10-05'
+                type: add
+                reason: test
+                description: testing 123
+                items:
+                  - code: SKU-00001
+                    quantity: '20'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/update:
+    put:
+      tags:
+        - Product
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SKU-00001
+                name: Iron Bar updated
+                department: Iron
+                category: Iron
+                isActive: true
+                price: '1000'
+                cost: '800'
+                discount: '5'
+                deletedAt: null
+                _id: 66c508631525788505952acd
+                createdAt: '2024-08-20T21:19:31.161Z'
+                updatedAt: '2024-08-20T21:19:31.161Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/destroy:
+    post:
+      tags:
+        - Product
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: SKU-00001
+                name: Iron Bar Updated
+                department: Iron
+                category: Iron
+                isActive: true
+                price: '1000'
+                cost: '800'
+                discount: '6'
+                deletedAt: null
+                _id: 66c504ac2c66fe0b0fc0924b
+                createdAt: '2024-08-20T21:03:40.230Z'
+                updatedAt: '2024-08-20T21:03:40.230Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrder/all:
+    get:
+      tags:
+        - Purchase Order
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrder/nextNumber:
+    get:
+      tags:
+        - Purchase Order
+      summary: getNext PO Number
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrder/findById/{id}:
+    get:
+      tags:
+        - Purchase Order
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66c63d2e0afd5e32282aa07c
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrder/create:
+    post:
+      tags:
+        - Purchase Order
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: PO00001
+                orderDate: '2024-10-12'
+                requiredDate: '2024-10-12'
+                remark: TEST remark
+                supplier:
+                  _id: 66c5023bc7a4629bb9460acf
+                  code: SUP0001
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: test item remark
+                    rate: '1000'
+                    discount: '0'
+                    quantity: '5'
+                  - code: SKU-00002
+                    name: Iron Bar2
+                    remark: test item remark 2
+                    rate: '1500'
+                    discount: '0'
+                    quantity: '5'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrder/update:
+    put:
+      tags:
+        - Purchase Order
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: PO00001
+                orderDate: '2024-10-12T00:00:00.000Z'
+                requiredDate: '2024-10-12'
+                remark: TEST remark Updated
+                supplier:
+                  _id: 66c5023bc7a4629bb9460acf
+                  code: SUP0001
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: test item remark
+                    quantity: '10'
+                    rate: '1000'
+                    discount: '0'
+                    discountAmount: '0'
+                    subTotal: '5000'
+                    total: '5000'
+                  - code: SKU-00002
+                    name: Iron Bar2
+                    remark: test item remark 2
+                    quantity: '8'
+                    rate: '1500'
+                    discount: '0'
+                    discountAmount: '0'
+                    subTotal: '7500'
+                    total: '7500'
+                totalDiscount: '0'
+                subTotal: '12500'
+                total: '12500'
+                deletedAt: null
+                history:
+                  - event: Created
+                    user:
+                      _id: 66b0c5bf51d96fe7aa21f23b
+                      firstName: Yohan
+                      lastName: Yohan
+                      email: yohandal@gmail.com
+                      role: Admin
+                    timestamps: '2024-08-21T19:23:03.766Z'
+                _id: 66c63e978cd8116a940c0fa7
+                createdAt: '2024-08-21T19:23:03.780Z'
+                updatedAt: '2024-08-21T19:23:03.780Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrder/destroy:
+    post:
+      tags:
+        - Purchase Order
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: PO00001
+                orderDate: '2024-10-12T00:00:00.000Z'
+                requiredDate: '2024-10-12'
+                remark: TEST remark
+                supplier:
+                  _id: 66c5023bc7a4629bb9460acf
+                  code: SUP0001
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: test item remark
+                    quantity: '5'
+                    rate: '1000'
+                    discount: '0'
+                    discountAmount: '0'
+                    subTotal: '5000'
+                    total: '5000'
+                  - code: SKU-00002
+                    name: Iron Bar2
+                    remark: test item remark 2
+                    quantity: '5'
+                    rate: '1500'
+                    discount: '0'
+                    discountAmount: '0'
+                    subTotal: '7500'
+                    total: '7500'
+                totalDiscount: '0'
+                subTotal: '12500'
+                total: '12500'
+                deletedAt: null
+                history:
+                  - event: Created
+                    user:
+                      _id: 66b0c5bf51d96fe7aa21f23b
+                      firstName: Yohan
+                      lastName: Yohan
+                      email: yohandal@gmail.com
+                      role: Admin
+                    timestamps: '2024-09-01T16:36:17.561Z'
+                _id: 66d498011fc348ded9d76ee5
+                createdAt: '2024-09-01T16:36:17.573Z'
+                updatedAt: '2024-09-01T16:36:17.573Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReceived/all:
+    get:
+      tags:
+        - Purchase Order Recived
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReceived/nextNumber:
+    get:
+      tags:
+        - Purchase Order Recived
+      summary: getNext POR Number
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReceived/findById/{id}:
+    get:
+      tags:
+        - Purchase Order Recived
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReceived/create:
+    post:
+      tags:
+        - Purchase Order Recived
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: POR00001
+                purchaseOrderCode: PO00001
+                receivedDate: '2024-10-16'
+                remark: TEST Revice remark
+                discount: '3'
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    orderedQuantity: '5'
+                    receivedQuantity: '2'
+                    requestAmount: '1000'
+                    amount: '800'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReceived/update:
+    put:
+      tags:
+        - Purchase Order Recived
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: POR00003
+                purchaseOrderCode: PO00001
+                receivedDate: '2024-10-16T00:00:00.000Z'
+                remark: TEST Revice remark
+                discount: '3'
+                totalDiscount: '48'
+                subTotal: '1600'
+                total: '1552'
+                deletedAt: null
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    orderedQuantity: '5'
+                    receivedQuantity: '1'
+                    requestAmount: '1000'
+                    amount: '800'
+                    _id: 66d4a566d178e306ddc1651a
+                _id: 66d4a566d178e306ddc16519
+                createdAt: '2024-09-01T17:33:26.895Z'
+                updatedAt: '2024-09-01T17:33:26.895Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReceived/destroy:
+    post:
+      tags:
+        - Purchase Order Recived
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: POR00003
+                purchaseOrderCode: PO00001
+                receivedDate: '2024-10-16T00:00:00.000Z'
+                remark: TEST Revice remark
+                discount: '3'
+                totalDiscount: '48'
+                subTotal: '1600'
+                total: '1552'
+                deletedAt: null
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    orderedQuantity: '5'
+                    receivedQuantity: '1'
+                    requestAmount: '1000'
+                    amount: '800'
+                    _id: 66d4a566d178e306ddc1651a
+                _id: 66d4a566d178e306ddc16519
+                createdAt: '2024-09-01T17:33:26.895Z'
+                updatedAt: '2024-09-01T17:33:26.895Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReturnStock/all:
+    get:
+      tags:
+        - Purchase Order Return Stock
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReturnStock/create:
+    post:
+      tags:
+        - Purchase Order Return Stock
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: PORS00001
+                purchaseOrderCode: PO00001
+                date: '2024-10-16'
+                remark: Return Stock Remark
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    rate: '800'
+                    quantity: '3'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReturnStock/update:
+    put:
+      tags:
+        - Purchase Order Return Stock
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: PORS00001
+                date: '2024-10-16T00:00:00.000Z'
+                purchaseOrderCode: PO00001
+                remark: Return Stock Remark
+                subTotal: '2400'
+                total: '2400'
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    quantity: '1'
+                    rate: '800'
+                deletedAt: null
+                _id: 66d60997cdc2fce339adfa22
+                createdAt: '2024-09-02T18:53:11.337Z'
+                updatedAt: '2024-09-02T18:53:11.337Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReturnStock/destroy:
+    post:
+      tags:
+        - Purchase Order Return Stock
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: PORS00001
+                date: '2024-10-16T00:00:00.000Z'
+                purchaseOrderCode: PO00001
+                remark: Return Stock Remark
+                subTotal: '2400'
+                total: '2400'
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    quantity: '1'
+                    rate: '800'
+                deletedAt: null
+                _id: 66d60997cdc2fce339adfa22
+                createdAt: '2024-09-02T18:53:11.337Z'
+                updatedAt: '2024-09-02T18:53:11.337Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /purchaseOrderReturnStock/nextNumber:
+    get:
+      tags:
+        - Purchase Order Return Stock
+      summary: getNext POR Number
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

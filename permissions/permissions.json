@@ -1,0 +1,44 @@
+[
+  {
+    "group": "User",
+    "permissions": [
+      {
+        "key": "user.view",
+        "value": "View All Users"
+      },
+      {
+        "key": "user.create",
+        "value": "Create User"
+      },
+      {
+        "key": "user.update",
+        "value": "Update User"
+      },
+      {
+        "key": "user.delete",
+        "value": "Delete User"
+      }
+    ]
+  },
+  {
+    "group": "Role",
+    "permissions": [
+      {
+        "key": "role.view",
+        "value": "View All Roles"
+      },
+      {
+        "key": "role.create",
+        "value": "Create Role"
+      },
+      {
+        "key": "role.update",
+        "value": "Update Role"
+      },
+      {
+        "key": "role.delete",
+        "value": "Delete Role"
+      }
+    ]
+  }
+]
