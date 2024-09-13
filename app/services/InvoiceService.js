@@ -6,7 +6,7 @@ const Product = require('../models/Product')
 
 const userResource = require("../resources/userResource");
 
-const { formatNumberWithPrefix } = require('../helper')
+const { formatNumberWithPrefix, isPositiveNumber } = require('../helper')
 const { ValidationException } = require('../exceptions');
 const { now, isValidObjectId } = require('mongoose');
 
@@ -69,10 +69,54 @@ exports.create = async (data, user) => {
         [`items.${index}.code`]: "Product not found",
       };
     }
+
+    const warehouseQuantity = [...product.warehouseQuantity]
+    const warehouseItem = warehouseQuantity?.find(row => row?.warehouse == "Default")
+    if (parseFloat(warehouseItem?.quantity) < parseFloat(item?.quantity)) {
+      errorObject = {
+        ...errorObject,
+        [`items.${index}.code`]: "Product low on stock",
+      };
+    }
   }
 
   if (Object.keys(errorObject)?.length > 0) {
     throw new ValidationException(errorObject);
+  }
+
+  for (let index = 0; index < data?.items.length; index++) {
+    const row = data?.items[index];
+    const product = await Product.findOne({ code: row.code }).lean()
+    const historyData = [...product.history]
+    const newHistoryItem = {
+      event: `Invoice Created ${data?.code}`,
+      type: "remove",
+      quantity: row?.quantity,
+      user: userResource.logResource(user),
+      stockAdjustment: null,
+      timestamps: now()
+    }
+    historyData.push(newHistoryItem)
+
+    const warehouseQuantity = [...product.warehouseQuantity]
+    const findIndex = warehouseQuantity?.findIndex(row => row?.warehouse == "Default")
+    const warehouseItem = warehouseQuantity?.find(row => row?.warehouse == "Default")
+    let newItem = {
+      ...warehouseItem,
+      quantity: parseFloat(warehouseItem?.quantity) - parseFloat(row?.quantity)
+    }
+    warehouseQuantity.splice(findIndex, 1, newItem)
+
+    await Product.findByIdAndUpdate(
+      product?._id,
+      {
+        $set: {
+          warehouseQuantity: warehouseQuantity,
+          history: historyData
+        },
+      },
+      { new: true }
+    );
   }
 
   const mappedItems = data?.items?.map((row) => {
@@ -184,12 +228,75 @@ exports.update = async (data, user) => {
         [`items.${index}.code`]: "Product not found",
       };
     }
+    const currentItem = invoice?.items?.find(row => row?.code == item?.code)
+    let currentQuantity = 0
+    if (currentItem) {
+      currentQuantity = currentItem?.quantity
+    }
+    const warehouseQuantity = [...product.warehouseQuantity]
+    const warehouseItem = warehouseQuantity?.find(row => row?.warehouse == "Default")
+    const quantityDifference = parseFloat(warehouseItem?.quantity) + parseFloat(currentQuantity)
+
+    let positiveNumber = Math.abs(quantityDifference);
+
+    if (parseFloat(positiveNumber) < parseFloat(item?.quantity)) {
+      errorObject = {
+        ...errorObject,
+        [`items.${index}.code`]: "Product low on stock",
+      };
+    }
   }
 
   if (Object.keys(errorObject)?.length > 0) {
     throw new ValidationException(errorObject);
   }
 
+  for (let index = 0; index < data?.items.length; index++) {
+    const row = data?.items[index];
+    const product = await Product.findOne({ code: row.code }).lean()
+
+    const currentItem = invoice?.items?.find(invoiceRow => invoiceRow?.code == row?.code)
+    let currentQuantity = 0
+    if (currentItem) {
+      currentQuantity = currentItem?.quantity
+    }
+    const newQuantity = parseFloat(row?.quantity) - parseFloat(currentQuantity)
+
+    if (newQuantity != 0) {
+      const warehouseQuantity = [...product.warehouseQuantity]
+      const findIndex = warehouseQuantity?.findIndex(row => row?.warehouse == "Default")
+      const warehouseItem = warehouseQuantity?.find(row => row?.warehouse == "Default")
+      let positiveNumber = Math.abs(newQuantity);
+
+      const historyData = [...product.history]
+      const newHistoryItem = {
+        event: `Invoice Update ${invoice?.code}`,
+        type: "remove",
+        quantity: row?.quantity,
+        user: userResource.logResource(user),
+        stockAdjustment: null,
+        timestamps: now()
+      }
+      historyData.push(newHistoryItem)
+
+      let newItem = {
+        ...warehouseItem,
+      quantity: Math.abs(parseFloat(warehouseItem?.quantity) - parseFloat(positiveNumber))
+      }
+      warehouseQuantity.splice(findIndex, 1, newItem)
+
+      await Product.findByIdAndUpdate(
+        product?._id,
+        {
+          $set: {
+            warehouseQuantity: warehouseQuantity,
+            history: historyData
+          },
+        },
+        { new: true }
+      );
+    }
+  }
   const mappedItems = data?.items?.map((row) => {
     const subTotal = parseFloat(row?.rate) * parseFloat(row?.quantity);
     const discountAmount =
