@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: inventory_system
+  title: Inventory System
   version: 1.0.0
 servers:
   - url: http://invsystem.ap-southeast-1.elasticbeanstalk.com
@@ -20,6 +20,9 @@ tags:
   - name: Purchase Order
   - name: Purchase Order Recived
   - name: Purchase Order Return Stock
+  - name: Invoice
+  - name: Invoice Payment
+  - name: Credit Note
 paths:
   /users/login:
     post:
@@ -33,7 +36,7 @@ paths:
               type: object
               example:
                 email: yohandal@gmail.com
-                password: 123admin
+                password: admin123
       responses:
         '200':
           description: Successful response
@@ -67,10 +70,29 @@ paths:
                 email: yohandal@gmail.com
                 password: 123admin
                 role: Admin
-                permissions:
-                  - users.create
-                  - users.update
-                  - users.delete
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /users/update:
+    post:
+      tags:
+        - User
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                _id: Yohan
+                firstName: Yohan
+                lastName: Dalpethadu
+                email: yohandal@gmail.com
+                role: Admin
       security:
         - bearerAuth: []
       responses:
@@ -1193,6 +1215,477 @@ paths:
       summary: getNext POR Number
       security:
         - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoice/all:
+    get:
+      tags:
+        - Invoice
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoice/create:
+    post:
+      tags:
+        - Invoice
+      summary: Create with payment Cheque
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: INV0000002
+                date: '2024-10-10'
+                deliveryDate: '2024-10-10'
+                customerCode: CUS002
+                address: no 123 test rd test colombo
+                salesRepCode: SALESR0001
+                type: normal
+                customerRemark: Test Remark
+                customerRemarkFreeItems: ''
+                hasFreeIssueItems: false
+                payment:
+                  code: P0000001
+                  date: '2024-10-10'
+                  amount: '2352'
+                  paymentMethod: Cheque
+                  cheque:
+                    number: C1231231
+                    date: '2024-10-10'
+                  remark: test
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    rate: '800'
+                    discount: '2'
+                    quantity: '3'
+                    type: normal
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoice/update:
+    put:
+      tags:
+        - Invoice
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: INV0000001
+                date: '2024-10-10T00:00:00.000Z'
+                deliveryDate: '2024-10-10T00:00:00.000Z'
+                customerCode: CUS002
+                address: no 123 test rd test colombo
+                salesRepCode: SALESR0001
+                type: normal
+                customerRemark: Test Remark
+                customerRemarkFreeItems: ''
+                hasFreeIssueItems: false
+                totalDiscount: '160'
+                subTotal: '8000'
+                total: '7840'
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    quantity: '50'
+                    rate: '800'
+                    discount: '2'
+                    discountAmount: '160'
+                    type: normal
+                    subTotal: '8000'
+                    total: '7840'
+                deletedAt: null
+                remainingAmount: '7840'
+                status: pending
+                history:
+                  - event: Created
+                    user:
+                      _id: 66b0c5bf51d96fe7aa21f23b
+                      firstName: Yohan
+                      lastName: Dalpethadu
+                      email: yohandal@gmail.com
+                      role: Admin
+                    timestamps: '2024-09-13T20:12:28.269Z'
+                _id: 66e49cacd230ed9b790ab7b6
+                createdAt: '2024-09-13T20:12:28.273Z'
+                updatedAt: '2024-09-13T20:12:28.273Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoice/destroy:
+    post:
+      tags:
+        - Invoice
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                _id: 66e1d883bb35ff9350bba9fe
+                code: INV0000001
+                date: '2024-10-10T00:00:00.000Z'
+                deliveryDate: '2024-10-10T00:00:00.000Z'
+                customerCode: CUS002
+                address: no 123 test rd test colombo
+                salesRepCode: SALESR0001
+                type: normal
+                customerRemark: Test Remark Updated
+                customerRemarkFreeItems: ''
+                hasFreeIssueItems: false
+                totalDiscount: '48'
+                subTotal: '2400'
+                total: '2352'
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    quantity: '10'
+                    rate: '800'
+                    discount: '2'
+                    discountAmount: '48'
+                    type: normal
+                    subTotal: '2400'
+                    total: '2352'
+                deletedAt: null
+                history:
+                  - event: Created
+                    user:
+                      _id: 66b0c5bf51d96fe7aa21f23b
+                      firstName: Yohan
+                      lastName: Dalpethadu
+                      email: yohandal@gmail.com
+                      role: Admin
+                    timestamps: '2024-09-11T17:50:59.007Z'
+                createdAt: '2024-09-11T17:50:59.013Z'
+                updatedAt: '2024-09-11T17:50:59.013Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoice/nextNumber:
+    get:
+      tags:
+        - Invoice
+      summary: getNext invocie Number
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+          example: normal
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoice/findById/{id}:
+    get:
+      tags:
+        - Invoice
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66e49cacd230ed9b790ab7b6
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoicePayment/all:
+    get:
+      tags:
+        - Invoice Payment
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoicePayment/create:
+    post:
+      tags:
+        - Invoice Payment
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: P0000002
+                date: '2024-10-10'
+                amount: '5000'
+                paymentMethod: Bank Transfer
+                bank:
+                  name: Commercial Bank
+                  branch: Colombo
+                  date: '2024-10-10'
+                remark: test
+                invoiceCode: INV0000001
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoicePayment/update:
+    put:
+      tags:
+        - Invoice Payment
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: P0000002
+                invoiceCode: INV0000001
+                date: '2024-10-10T00:00:00.000Z'
+                amount: '10000'
+                paymentMethod: Bank Transfer
+                bank:
+                  name: Commercial Bank
+                  branch: Colombo
+                  date: '2024-10-10'
+                cheque: null
+                remark: test
+                deletedAt: null
+                _id: 66e8537809e8155de037c646
+                createdAt: '2024-09-16T15:49:12.707Z'
+                updatedAt: '2024-09-16T15:49:12.707Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoicePayment/destroy:
+    post:
+      tags:
+        - Invoice Payment
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: P0000002
+                invoiceCode: INV0000001
+                date: '2024-10-10T00:00:00.000Z'
+                amount: '10000'
+                paymentMethod: Bank Transfer
+                bank:
+                  name: Commercial Bank
+                  branch: Colombo
+                  date: '2024-10-10'
+                cheque: null
+                remark: test
+                deletedAt: null
+                _id: 66e8537809e8155de037c646
+                createdAt: '2024-09-16T15:49:12.707Z'
+                updatedAt: '2024-09-16T15:49:12.707Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoicePayment/nextNumber:
+    get:
+      tags:
+        - Invoice Payment
+      summary: get Next number
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoicePayment/findById/{id}:
+    get:
+      tags:
+        - Invoice Payment
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66e8533f9b9ce6022642341c
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /creditNote/all:
+    get:
+      tags:
+        - Credit Note
+      summary: getAll
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customerCode
+          in: query
+          schema:
+            type: string
+          example: CUS002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /creditNote/create:
+    post:
+      tags:
+        - Credit Note
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: CN0000001
+                customerCode: CUS002
+                paymentDate: '2024-10-10'
+                amount: '5000'
+                remark: test
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /creditNote/update:
+    put:
+      tags:
+        - Credit Note
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                _id: 66e86cb1e5d196587081354c
+                paymentDate: '2024-10-10T00:00:00.000Z'
+                amount: '5000'
+                remark: test
+                deletedAt: null
+                createdAt: '2024-09-16T17:36:49.370Z'
+                updatedAt: '2024-09-16T17:36:49.370Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /creditNote/destroy:
+    post:
+      tags:
+        - Credit Note
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                _id: 66e86cb1e5d196587081354c
+                paymentDate: '2024-10-10T00:00:00.000Z'
+                amount: '5000'
+                remark: test
+                deletedAt: null
+                createdAt: '2024-09-16T17:36:49.370Z'
+                updatedAt: '2024-09-16T17:36:49.370Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /creditNote/nextNumber:
+    get:
+      tags:
+        - Credit Note
+      summary: get Next number
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /creditNote/findById/{id}:
+    get:
+      tags:
+        - Credit Note
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66e8533f9b9ce6022642341c
       responses:
         '200':
           description: Successful response
