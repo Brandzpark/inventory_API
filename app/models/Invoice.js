@@ -98,11 +98,19 @@ const invoiceSchema = new Schema(
     remainingAmount: {
       type: String,
     },
+    setoffRemainingAmount: {
+      type: String,
+    },
+    setoffStatus: {
+      type: String,
+      default: "pending"
+    },
     status: {
       type: String,
       default: "pending"
     },
     history: [],
+    setoffs: [],
   },
   {
     timestamps: true,

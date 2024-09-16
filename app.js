@@ -28,7 +28,9 @@ const {
   PurchaseOrderRoutes,
   PurchaseOrderReceivedRoutes,
   PurchaseOrderStockReturnRoutes,
-  InvoiceRoutes
+  InvoiceRoutes,
+  InvoicePaymentRoutes,
+  CreditNoteRoutes
 } = require('./app/routes')
 
 
@@ -71,6 +73,8 @@ app.use('/purchaseOrder', authMiddleware, PurchaseOrderRoutes)
 app.use('/purchaseOrderReceived', authMiddleware, PurchaseOrderReceivedRoutes)
 app.use('/purchaseOrderReturnStock', authMiddleware, PurchaseOrderStockReturnRoutes)
 app.use('/invoice', authMiddleware, InvoiceRoutes)
+app.use('/invoicePayment', authMiddleware, InvoicePaymentRoutes)
+app.use('/creditNote', authMiddleware, CreditNoteRoutes)
 
 app.use(handleException);
 

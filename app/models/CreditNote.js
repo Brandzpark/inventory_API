@@ -17,13 +17,17 @@ const creditNoteSchema = new Schema(
     amount: {
       type: String,
     },
+    availableAmount: {
+      type: String,
+    },
     remark: {
       type: String,
     },
     deletedAt: {
       type: Date,
       default: null
-    }
+    },
+    history: [],
   },
   {
     timestamps: true,

@@ -72,7 +72,7 @@ exports.create = async (req, user) => {
   const history = [...purchaseOrder?.history];
 
   const historyItem = {
-    event: `Stock Return ${req?.code} Create`,
+    event: `Stock Return Create ${req?.code}`,
     user: userResource.logResource(user),
     timestamps: now(),
   };
@@ -219,7 +219,7 @@ exports.update = async (req, user) => {
   const history = [...purchaseOrder?.history];
 
   const historyItem = {
-    event: `Stock Return ${req?.code} Update`,
+    event: `Stock Return Update ${req?.code}`,
     user: userResource.logResource(user),
     timestamps: now(),
   };
@@ -396,7 +396,7 @@ exports.delete = async (req, user) => {
 
   const historyData = [...purchaseOrder.history]
   const historyItem = {
-    event: `Stock Return ${purchaseOrderStockReturn?.code} Deleted`,
+    event: `Stock Return Deleted ${purchaseOrderStockReturn?.code}`,
     user: userResource.logResource(user),
     timestamps: now(),
   };

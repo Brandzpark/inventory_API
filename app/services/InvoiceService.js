@@ -12,9 +12,15 @@ const { now, isValidObjectId } = require('mongoose');
 
 
 exports.getAll = async (data) => {
+  const invoices = await Invoice.find({ deletedAt: null }).lean()
+  for (let index = 0; index < invoices.length; index++) {
+    const invoice = invoices[index];
+    const payments = await InvoicePayment.find({ invoiceCode: invoice?.code, deletedAt: null })
+    invoice.payments = payments
+  }
   try {
     return {
-      data: await Invoice.find({ deletedAt: null }),
+      data: invoices
     };
   } catch (error) {
     throw new ValidationException(error);
@@ -28,10 +34,14 @@ exports.findById = async (data) => {
   if (!isValidObjectId(data?.id)) {
     throw new ValidationException("Invalid object ID");
   }
+  const invoice = await Invoice.findOne({ _id: data?.id, deletedAt: null }).lean()
+
+  const payments = await InvoicePayment.find({ invoiceCode: invoice?.code, deletedAt: null })
+  invoice.payments = payments
 
   try {
     return {
-      data: await Invoice.findOne({ _id: data?.id, deletedAt: null }),
+      data: invoice
     };
   } catch (error) {
     throw new ValidationException(error);
@@ -142,6 +152,7 @@ exports.create = async (data, user) => {
   const total = subTotal - totalDiscount
 
   let remainingAmount = total
+  let setoffRemainingAmount = total
   let status = "pending"
 
   const history = [{
@@ -157,7 +168,7 @@ exports.create = async (data, user) => {
     }
     const invoicePayment = await new InvoicePayment({ ...data?.payment, invoiceCode: data?.code }).save()
     history.push({
-      event: `Payment ${invoicePayment?.code} Created`,
+      event: `Payment Created ${invoicePayment?.code}`,
       user: userResource.logResource(user),
       timestamps: now(),
     })
@@ -192,6 +203,7 @@ exports.create = async (data, user) => {
     subTotal,
     total: total,
     remainingAmount,
+    setoffRemainingAmount,
     status,
     history
   }
@@ -281,7 +293,7 @@ exports.update = async (data, user) => {
 
       let newItem = {
         ...warehouseItem,
-      quantity: Math.abs(parseFloat(warehouseItem?.quantity) - parseFloat(positiveNumber))
+        quantity: Math.abs(parseFloat(warehouseItem?.quantity) - parseFloat(positiveNumber))
       }
       warehouseQuantity.splice(findIndex, 1, newItem)
 
@@ -318,6 +330,8 @@ exports.update = async (data, user) => {
   }, 0);
 
   const total = subTotal - totalDiscount
+  let setoffRemainingAmount = total
+
 
   const payments = await InvoicePayment?.find({ invoiceCode: data?.code }).lean()
   const payemntTotal = payments?.reduce((acc, curr) => {
@@ -363,6 +377,7 @@ exports.update = async (data, user) => {
     subTotal,
     total: total,
     remainingAmount,
+    setoffRemainingAmount,
     history: history,
     status: invoice.status
   }
@@ -385,7 +400,7 @@ exports.delete = async (data, user) => {
   let errorObject = {};
   const invoice = await Invoice.findOne({ _id: data?._id, deletedAt: null }).lean()
   if (!invoice) {
-    errorObject = { ...errorObject, salesRepCode: "Invoice not found" };
+    errorObject = { ...errorObject, code: "Invoice not found" };
   }
 
   if (Object.keys(errorObject)?.length > 0) {

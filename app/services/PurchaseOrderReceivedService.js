@@ -70,7 +70,7 @@ exports.create = async (req, user) => {
   const history = [...purchaseOrder?.history];
 
   const historyItem = {
-    event: `Receive ${req.code} Create`,
+    event: `Receive Create ${req.code}`,
     user: userResource.logResource(user),
     timestamps: now(),
   };
@@ -207,7 +207,7 @@ exports.update = async (req, user) => {
   const history = [...purchaseOrder?.history];
 
   const historyItem = {
-    event: `Receive ${req?.code} Update`,
+    event: `Receive Update ${req?.code}`,
     user: userResource.logResource(user),
     timestamps: now(),
   };
