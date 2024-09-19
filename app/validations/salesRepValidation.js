@@ -8,7 +8,7 @@ exports.createValidationSchema = yup.object({
     address: yup.string().required(),
     mobileNumber: yup.string().required(),
     nic: yup.string().required(),
-    taxNo: yup.string().required(),
+    // taxNo: yup.string().optional(),
     customers: yup.array()
         .defined()
         .required()
@@ -24,7 +24,7 @@ exports.updateValidationSchema = yup.object({
     address: yup.string().required(),
     mobileNumber: yup.string().required(),
     nic: yup.string().required(),
-    taxNo: yup.string().required(),
+    // taxNo: yup.string().optional(),
     customers: yup.array()
         .defined()
         .required()

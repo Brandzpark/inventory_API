@@ -20,6 +20,10 @@ const itemsSchema = mongoose.Schema(
       type: String,
       default: "0",
     },
+    isDamaged: {
+      type: Boolean,
+      default: false
+    },
     subTotal: {
       type: String,
     },
@@ -50,7 +54,13 @@ const invoiceReturnSchema = new Schema(
     deletedAt: {
       type: Date,
       default: null
-    }
+    },
+    subTotal: {
+      type: String,
+    },
+    total: {
+      type: String,
+    },
   },
   {
     timestamps: true,

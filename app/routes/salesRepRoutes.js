@@ -5,8 +5,9 @@ const SalesRepController = require('../controllers/salesRepController')
 
 
 router.get("/all", SalesRepController.getAll);
+router.get("/findBycode/:code", SalesRepController.findBycode);
 router.post("/create", SalesRepController.create);
-router.put("/update", SalesRepController.update);
+router.post("/update", SalesRepController.update);
 router.post("/destroy", SalesRepController.delete);
 
 

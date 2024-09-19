@@ -166,7 +166,7 @@ exports.create = async (data, user) => {
     if (invoicePaymentExist) {
       throw new ValidationException({ payment: `Payment Code \"${data?.payment?.code}}"\ already taken` });
     }
-    const invoicePayment = await new InvoicePayment({ ...data?.payment, invoiceCode: data?.code }).save()
+    const invoicePayment = await new InvoicePayment({ ...data?.payment, invoiceCode: data?.code, setOffRemaingAmount: data?.amount }).save()
     history.push({
       event: `Payment Created ${invoicePayment?.code}`,
       user: userResource.logResource(user),

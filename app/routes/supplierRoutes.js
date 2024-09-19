@@ -5,9 +5,9 @@ const SupplierController = require('../controllers/supplierController')
 
 
 router.get("/all", SupplierController.getAll);
-router.get("/findById/:id", SupplierController.findById);
+router.get("/findBycode/:code", SupplierController.findBycode);
 router.post("/create", SupplierController.create);
-router.put("/update", SupplierController.update);
+router.post("/update", SupplierController.update);
 router.post("/destroy", SupplierController.delete);
 
 

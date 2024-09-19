@@ -5,9 +5,10 @@ const CustomerController = require('../controllers/customerController')
 
 
 router.get("/all", CustomerController.getAll);
-router.get("/findById/:id", CustomerController.findById);
+router.get("/all/noPaginate", CustomerController.getAllNoPaginate);
+router.get("/findBycode/:code", CustomerController.findBycode);
 router.post("/create", CustomerController.create);
-router.put("/update", CustomerController.update);
+router.post("/update", CustomerController.update);
 router.post("/destroy", CustomerController.delete);
 
 

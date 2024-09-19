@@ -17,6 +17,9 @@ const invoicePaymentSchema = new Schema(
     amount: {
       type: String,
     },
+    setOffRemaingAmount: {
+      type: String,
+    },
     paymentMethod: {
       type: String,
     },

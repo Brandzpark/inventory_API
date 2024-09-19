@@ -10,5 +10,6 @@ module.exports = {
   PurchaseOrderStockReturnRoutes: require('./purchaseOrderStockReturnRoutes'),
   InvoiceRoutes: require('./invoiceRoutes'),
   InvoicePaymentRoutes: require('./invoicePaymentRoutes'),
+  InvoiceReturnRoutes: require('./invoiceReturnRoutes'),
   CreditNoteRoutes: require('./creditNoteRoutes'),
 }

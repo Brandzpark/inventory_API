@@ -229,7 +229,7 @@ exports.nextNumber = async (data) => {
   try {
     const documentCount = await InvoicePayment.find().countDocuments()
     return {
-      nextNumber: formatNumberWithPrefix(documentCount + 1, "P"),
+      nextNumber: formatNumberWithPrefix(documentCount + 1, "SPR"),
     };
   } catch (error) {
     throw new ValidationException(error);

@@ -9,7 +9,7 @@ exports.createValidationSchema = yup.object({
     price: yup.string().required(),
     isActive: yup.boolean().required(),
     cost: yup.string().required(),
-    discount: yup.string().required(),
+    discount: yup.string().optional(),
     warehouseQuantity: yup.array()
         .of(yup.object({
             warehouse: yup.string().default("Default"),
@@ -30,7 +30,7 @@ exports.updateValidationSchema = yup.object({
     price: yup.string().required(),
     isActive: yup.boolean().required(),
     cost: yup.string().required(),
-    discount: yup.string().required(),
+    discount: yup.string().optional(),
 })
 
 exports.deleteValidationSchema = yup.object({
