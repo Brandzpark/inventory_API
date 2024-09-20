@@ -41,6 +41,7 @@ exports.stockAdjustmentSchema = yup.object({
     date: yup.string().required(),
     type: yup.string().required(),
     reason: yup.string().required(),
+    type: yup.string().required(),
     description: yup.string().optional(),
     items: yup.array()
     .of(yup.object({

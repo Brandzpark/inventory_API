@@ -2,7 +2,7 @@ const Product = require('../models/Product')
 const StockAdjustment = require('../models/StockAdjustment')
 const ProductCategory = require('../models/ProductCategory')
 const ProductDepartment = require('../models/ProductDepartment')
-
+const { formatNumberWithPrefix } = require('../helper')
 
 const userResource = require('../resources/userResource');
 const { ValidationException } = require('../exceptions');
@@ -24,6 +24,16 @@ exports.getAll = async (data) => {
         page,
         limit: 50,
       })
+    }
+  } catch (error) {
+    throw new ValidationException(error)
+  }
+}
+
+exports.getAllNoPaginate = async (data) => {
+  try {
+    return {
+      data: await Product.find({ deletedAt: null })
     }
   } catch (error) {
     throw new ValidationException(error)
@@ -162,22 +172,31 @@ exports.delete = async (req, user) => {
   }
 }
 
-
+exports.getAllstockAdjustments = async (data) => {
+  const page = data?.page ?? 1
+  const search = data?.search ?? ""
+  const regex = new RegExp(search, 'i');
+  try {
+    return {
+      data: await StockAdjustment.paginate({
+        deletedAt: null,
+        $or: [
+          { code: regex }
+        ]
+      }, {
+        page,
+        limit: 50,
+      })
+    }
+  } catch (error) {
+    throw new ValidationException(error)
+  }
+}
 
 exports.stockAdjustment = async (data, user) => {
-  const createData = {
-    date: data?.date,
-    type: data?.type,
-    reason: data?.reason,
-    description: data?.description,
-    createdBy: userResource.logResource(user),
-    items: data?.items,
-  }
 
+  const nextStockNumber = await this.stockAdjustmentNextNumber()
   try {
-
-    const created = await new StockAdjustment(createData).save()
-
     for (let index = 0; index < data?.items.length; index++) {
       const item = data?.items[index];
       const product = await Product.findOne({ code: item?.code }).lean()
@@ -188,7 +207,7 @@ exports.stockAdjustment = async (data, user) => {
           type: data?.type,
           quantity: item?.quantity,
           user: userResource.logResource(user),
-          stockAdjustment: created._doc?._id,
+          stockAdjustment: nextStockNumber,
           timestamps: now()
         }
         historyData.push(newHistoryItem)
@@ -218,12 +237,42 @@ exports.stockAdjustment = async (data, user) => {
       }
     }
 
+    const mappedProducts = await Promise.all(data?.items?.map(async (row) => {
+      const product = await Product.findOne({ code: row?.code }).lean()
+      return {
+        ...row,
+        name: product?.name
+      }
+    }))
+
+    const createData = {
+      code: nextStockNumber,
+      date: data?.date,
+      type: data?.type,
+      reason: data?.reason,
+      description: data?.description,
+      createdBy: userResource.logResource(user),
+      items: mappedProducts,
+    }
+
+    const created = await new StockAdjustment(createData).save()
+
+
     return {
       data: created._doc
     }
 
   } catch (error) {
     throw new ValidationException(error)
+  }
+}
+
+exports.stockAdjustmentNextNumber = async () => {
+  try {
+    const documentCount = await StockAdjustment.countDocuments()
+    return formatNumberWithPrefix(documentCount + 1, "STAJ")
+  } catch (error) {
+    throw new ValidationException(error);
   }
 }
 

@@ -15,6 +15,19 @@ exports.getAll = async (req, res, next) => {
   }
 }
 
+exports.getAllNoPaginate = async (req, res, next) => {
+  try {
+    const response = await ProductService.getAllNoPaginate(req?.query);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      ...response
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 
 exports.findBycode = async (req, res, next) => {
@@ -66,6 +79,19 @@ exports.delete = async (req, res, next) => {
   try {
     await global.validate(deleteValidationSchema, req);
     const response = await ProductService.delete(req.body, req.user);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      ...response
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+exports.getAllStockAdjustment = async (req, res, next) => {
+  try {
+    const response = await ProductService.getAllstockAdjustments(req.query);
     res.status(200).json({
       status: 200,
       success: true,

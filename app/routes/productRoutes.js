@@ -5,11 +5,13 @@ const ProductController = require('../controllers/productController')
 
 
 router.get("/all", ProductController.getAll);
+router.get("/all/noPaginate", ProductController.getAllNoPaginate);
 router.get("/findBycode/:code", ProductController.findBycode);
 router.post("/create", ProductController.create);
 router.post("/update", ProductController.update);
 router.post("/destroy", ProductController.delete);
 
+router.get("/getAllStockAdjestment", ProductController.getAllStockAdjustment);
 router.post("/stockAdjestment", ProductController.stockAdjustment);
 
 
