@@ -22,6 +22,7 @@ tags:
   - name: Purchase Order Return Stock
   - name: Invoice
   - name: Invoice Payment
+  - name: Invoice Return
   - name: Credit Note
 paths:
   /users/login:
@@ -206,20 +207,19 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /suppliers/findById/{id}:
+  /suppliers/FindByCode/{code}:
     get:
       tags:
         - Supplier
-      summary: FindByID
+      summary: FindByCode
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: code
           in: path
           schema:
             type: string
           required: true
-          example: 66c4fad16a4048e46ce42035
       responses:
         '200':
           description: Successful response
@@ -252,7 +252,7 @@ paths:
           content:
             application/json: {}
   /suppliers/update:
-    put:
+    post:
       tags:
         - Supplier
       summary: Update
@@ -325,20 +325,19 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /salesRep/findById/{id}:
+  /salesRep/findBycode/{code}:
     get:
       tags:
         - Sales Rep
-      summary: FindByID
+      summary: FindByCode
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: code
           in: path
           schema:
             type: string
           required: true
-          example: 66c4fad16a4048e46ce42035
       responses:
         '200':
           description: Successful response
@@ -388,7 +387,7 @@ paths:
           content:
             application/json: {}
   /salesRep/update:
-    put:
+    post:
       tags:
         - Sales Rep
       summary: Update
@@ -473,25 +472,30 @@ paths:
       summary: getAll
       security:
         - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
       responses:
         '200':
           description: Successful response
           content:
             application/json: {}
-  /customers/findById/{id}:
+  /customers/FindByCode/{code}:
     get:
       tags:
         - Customer
-      summary: FindByID
+      summary: FindByCode
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: code
           in: path
           schema:
             type: string
           required: true
-          example: 66b23beebee9c27d6a378e1d
       responses:
         '200':
           description: Successful response
@@ -508,10 +512,11 @@ paths:
             schema:
               type: object
               example:
-                code: CUS002
+                code: CUS0000022
                 salutation: MR
                 name: Test Customer
                 email: textcus@test.com
+                status: active
                 nic: 871274822v
                 mobileNumber: '0711231238'
                 address: no 123 test rd test colombo
@@ -527,7 +532,7 @@ paths:
           content:
             application/json: {}
   /customers/update:
-    put:
+    post:
       tags:
         - Customer
       summary: Update
@@ -606,20 +611,43 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /products/findById/{id}:
+  /products/get/categories:
     get:
       tags:
         - Product
-      summary: FindByID
+      summary: get categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/get/departments:
+    get:
+      tags:
+        - Product
+      summary: get departments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/FindByCode/{code}:
+    get:
+      tags:
+        - Product
+      summary: FindByCode
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: code
           in: path
           schema:
             type: string
           required: true
-          example: 66b245c188676d9fe3dbeeb6
       responses:
         '200':
           description: Successful response
@@ -641,16 +669,50 @@ paths:
                 department: Iron
                 category: Iron
                 isActive: true
-                unit: g
-                weight: '200'
-                manufacturer: Test Iron Works
-                brand: test
                 price: '1000'
                 cost: '800'
                 discount: '5'
                 warehouseQuantity:
                   - warehouse: Default
                     quantity: 1
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/create/category:
+    post:
+      tags:
+        - Product
+      summary: Create category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Iron
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /products/create/department:
+    post:
+      tags:
+        - Product
+      summary: Create department
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Material
       security:
         - bearerAuth: []
       responses:
@@ -683,8 +745,20 @@ paths:
           description: Successful response
           content:
             application/json: {}
+  /products/getAllStockAdjestment:
+    get:
+      tags:
+        - Product
+      summary: get All Stock Adjustment
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
   /products/update:
-    put:
+    post:
       tags:
         - Product
       summary: Update
@@ -769,20 +843,19 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /purchaseOrder/findById/{id}:
+  /purchaseOrder/FindByCode/{code}:
     get:
       tags:
         - Purchase Order
-      summary: FindByID
+      summary: FindByCode
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: code
           in: path
           schema:
             type: string
           required: true
-          example: 66c63d2e0afd5e32282aa07c
       responses:
         '200':
           description: Successful response
@@ -1552,6 +1625,148 @@ paths:
     get:
       tags:
         - Invoice Payment
+      summary: FindByID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 66e8533f9b9ce6022642341c
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoiceReturn/all:
+    get:
+      tags:
+        - Invoice Return
+      summary: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoiceReturn/create:
+    post:
+      tags:
+        - Invoice Return
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: P0000002
+                date: '2024-10-10'
+                remark: test
+                invoiceCode: INV0000001
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    rate: '800'
+                    quantity: '10'
+                    isDamaged: false
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoiceReturn/update:
+    put:
+      tags:
+        - Invoice Return
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: P0000002
+                invoiceCode: INV0000001
+                date: '2024-10-10T00:00:00.000Z'
+                remark: test
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    quantity: '10'
+                    rate: '800'
+                    isDamaged: false
+                deletedAt: null
+                total: '8000'
+                _id: 66ea675f779ca7178484a9ee
+                createdAt: '2024-09-18T05:38:39.558Z'
+                updatedAt: '2024-09-18T05:38:39.558Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoiceReturn/destroy:
+    post:
+      tags:
+        - Invoice Return
+      summary: Delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: P0000002
+                invoiceCode: INV0000001
+                date: '2024-10-10T00:00:00.000Z'
+                remark: test
+                items:
+                  - code: SKU-00001
+                    name: Iron Bar updated
+                    remark: asd
+                    quantity: '10'
+                    rate: '800'
+                    isDamaged: false
+                deletedAt: null
+                total: '8000'
+                _id: 66ea675f779ca7178484a9ee
+                createdAt: '2024-09-18T05:38:39.558Z'
+                updatedAt: '2024-09-18T05:38:39.558Z'
+                __v: 0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoiceReturn/nextNumber:
+    get:
+      tags:
+        - Invoice Return
+      summary: get Next number
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoiceReturn/findById/{id}:
+    get:
+      tags:
+        - Invoice Return
       summary: FindByID
       security:
         - bearerAuth: []
