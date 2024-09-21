@@ -15,11 +15,22 @@ exports.getAll = async (req, res, next) => {
   }
 }
 
-
-
-exports.findBycode = async (req, res, next) => {
+exports.getAllNoPaginate = async (req, res, next) => {
   try {
-    const response = await SupplierService.findBycode(req.params);
+    const response = await SupplierService.getAllNoPaginate(req?.query);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      ...response
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+exports.findByCode = async (req, res, next) => {
+  try {
+    const response = await SupplierService.findByCode(req.params);
     res.status(200).json({
       status: 200,
       success: true,

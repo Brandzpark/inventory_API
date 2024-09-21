@@ -9,10 +9,37 @@ const { now, isValidObjectId } = require("mongoose");
 
 const { formatNumberWithPrefix, isPositiveNumber } = require('../helper')
 
-exports.getAll = async () => {
+exports.getAll = async (data) => {
+  const page = data?.page ?? 1
+  const search = data?.search ?? ""
+  const regex = new RegExp(search, 'i');
   try {
+    const purchaseOrderReceives = await PurchaseOrderReceived.paginate({
+      deletedAt: null,
+      $or: [
+        { code: regex },
+      ]
+    },
+      {
+        lean: true,
+        page,
+        limit: 50,
+      })
+
+    const docs = await Promise.all(purchaseOrderReceives?.docs?.map(async (row) => {
+      const purchaseOrder = await PurchaseOrder.findOne({ code: row?.purchaseOrderCode }).lean()
+      const supplier = await Supplier.findOne({ code: purchaseOrder?.supplier?.code }).lean()
+      return {
+        ...row,
+        supplier
+      }
+    }))
+
+    purchaseOrderReceives.docs = docs
+
+
     return {
-      data: await PurchaseOrderReceived.find({ deletedAt: null }),
+      data: purchaseOrderReceives
     };
   } catch (error) {
     throw new ValidationException(error);

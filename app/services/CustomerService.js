@@ -37,7 +37,7 @@ exports.getAllNoPaginate = async (data) => {
   }
 }
 
-exports.findBycode = async (data) => {
+exports.findByCode = async (data) => {
   if (!data?.code) {
     throw new ValidationException("Missing parameter")
   }

@@ -7,7 +7,7 @@ const {
 
 exports.getAll = async (req, res, next) => {
   try {
-    const response = await PurchaseOrderService.getAll();
+    const response = await PurchaseOrderService.getAll(req.query);
     res.status(200).json({
       status: 200,
       success: true,
@@ -18,9 +18,9 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
-exports.findById = async (req, res, next) => {
+exports.findByCode = async (req, res, next) => {
   try {
-    const response = await PurchaseOrderService.findById(req.params);
+    const response = await PurchaseOrderService.findByCode(req.params);
     res.status(200).json({
       status: 200,
       success: true,

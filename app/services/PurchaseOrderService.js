@@ -8,28 +8,56 @@ const { now, isValidObjectId } = require("mongoose");
 
 const { formatNumberWithPrefix } = require('../helper')
 
-exports.getAll = async () => {
+exports.getAll = async (data) => {
+  const page = data?.page ?? 1
+  const search = data?.search ?? ""
+  const regex = new RegExp(search, 'i');
+
+  const purchaseOrders = await PurchaseOrder.paginate({
+    deletedAt: null,
+    $or: [
+      { code: regex },
+      { ['supplier.code']: regex }
+    ]
+  },
+    {
+      lean: true,
+      page,
+      limit: 50,
+    })
+
+  const docs = await Promise.all(purchaseOrders?.docs?.map(async (row) => {
+    const supplier = await Supplier.findOne({ code: row?.supplier?.code }).lean()
+    return {
+      ...row,
+      supplier
+    }
+  }))
+
+  purchaseOrders.docs = docs
+
   try {
     return {
-      data: await PurchaseOrder.find({ deletedAt: null }),
+      data: purchaseOrders,
     };
   } catch (error) {
     throw new ValidationException(error);
   }
 };
 
-exports.findById = async (data) => {
-  if (!data?.id) {
+exports.findByCode = async (data) => {
+  if (!data?.code) {
     throw new ValidationException("Missing parameter");
   }
 
-  if (!isValidObjectId(data?.id)) {
-    throw new ValidationException("Invalid object ID");
+  const purchaseOrder = await PurchaseOrder.findOne({ code: data?.code, deletedAt: null }).lean()
+  if (!purchaseOrder) {
+    throw new ValidationException("Purchase Order not found");
   }
-
+  purchaseOrder.supplier = await Supplier.findOne({ code: purchaseOrder?.supplier?.code })
   try {
     return {
-      data: await PurchaseOrder.findOne({ _id: data?.id, deletedAt: null }),
+      data: purchaseOrder
     };
   } catch (error) {
     throw new ValidationException(error);
@@ -63,17 +91,19 @@ exports.create = async (req, user) => {
     throw new ValidationException(errorObject);
   }
 
-  const mappedItems = req?.items?.map((row) => {
+  const mappedItems = await Promise.all(req?.items?.map(async (row) => {
+    const product = await Product.findOne({ code: row?.code }).lean();
     const subTotal = parseFloat(row?.rate) * parseFloat(row?.quantity);
     const discountAmount =
       (parseFloat(subTotal) * parseFloat(row?.discount)) / 100;
     return {
       ...row,
+      name: product?.name,
       discountAmount,
       subTotal,
       total: subTotal - discountAmount,
     };
-  });
+  }));
 
   const totalDiscount = mappedItems?.reduce((acc, curr) => {
     return acc + parseFloat(curr?.discountAmount);
@@ -148,17 +178,19 @@ exports.update = async (req, user) => {
     throw new ValidationException(errorObject);
   }
 
-  const mappedItems = req?.items?.map((row) => {
+  const mappedItems = await Promise.all(req?.items?.map(async (row) => {
+    const product = await Product.findOne({ code: row?.code }).lean();
     const subTotal = parseFloat(row?.rate) * parseFloat(row?.quantity);
     const discountAmount =
       (parseFloat(subTotal) * parseFloat(row?.discount)) / 100;
     return {
       ...row,
+      name: product?.name,
       discountAmount,
       subTotal,
       total: subTotal - discountAmount,
     };
-  });
+  }));
 
   const history = [...purchaseOrder?.history];
 

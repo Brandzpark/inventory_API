@@ -4,7 +4,7 @@ exports.createValidationSchema = yup.object({
   code: yup.string().required(),
   orderDate: yup.string().required(),
   requiredDate: yup.string().required(),
-  remark: yup.string().required(),
+  remark: yup.string().nullable().optional(),
   supplier: yup
     .object({
       _id: yup.string().required(),
@@ -16,8 +16,7 @@ exports.createValidationSchema = yup.object({
     .of(
       yup.object({
         code: yup.string().required(),
-        name: yup.string().required(),
-        remark: yup.string().required(),
+        remark: yup.string().optional(),
         rate: yup.string().required(),
         discount: yup.string().required(),
         quantity: yup.string().required(),
@@ -33,7 +32,7 @@ exports.updateValidationSchema = yup.object({
   code: yup.string().required(),
   orderDate: yup.string().required(),
   requiredDate: yup.string().required(),
-  remark: yup.string().required(),
+  remark: yup.string().nullable().optional(),
   supplier: yup
     .object({
       _id: yup.string().required(),
@@ -45,8 +44,7 @@ exports.updateValidationSchema = yup.object({
     .of(
       yup.object({
         code: yup.string().required(),
-        name: yup.string().required(),
-        remark: yup.string().required(),
+        remark: yup.string().optional(),
         rate: yup.string().required(),
         discount: yup.string().required(),
         quantity: yup.string().required(),

@@ -7,7 +7,7 @@ const {
 
 exports.getAll = async (req, res, next) => {
   try {
-    const response = await PurchaseOrderReceivedService.getAll(); 
+    const response = await PurchaseOrderReceivedService.getAll(req.query);
     res.status(200).json({
       status: 200,
       success: true,
@@ -73,7 +73,7 @@ exports.delete = async (req, res, next) => {
   }
 };
 
-exports.nextNumber = async (req, res, next) => {  
+exports.nextNumber = async (req, res, next) => {
   try {
     const response = await PurchaseOrderReceivedService.nextNumber();
     res.status(200).json({

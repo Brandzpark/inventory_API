@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const purchaseOrderReceivedSchema = new Schema(
     {
@@ -62,5 +63,6 @@ const purchaseOrderReceivedSchema = new Schema(
     },
     { timestamps: true }
 );
+purchaseOrderReceivedSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("PurchaseOrderReceived", purchaseOrderReceivedSchema);

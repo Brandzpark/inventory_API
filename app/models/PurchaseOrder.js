@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const itemsSchema = mongoose.Schema(
   {
@@ -77,14 +78,6 @@ const purchaseOrderSchema = new Schema(
         type: String,
       },
     },
-    salesRep: {
-      _id: {
-        type: String,
-      },
-      code: {
-        type: String,
-      },
-    },
     items: [itemsSchema],
     totalDiscount: {
       type: String,
@@ -105,5 +98,7 @@ const purchaseOrderSchema = new Schema(
     timestamps: true,
   }
 );
+
+purchaseOrderSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("PurchaseOrder", purchaseOrderSchema);

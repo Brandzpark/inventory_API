@@ -26,7 +26,17 @@ exports.getAll = async (data) => {
   }
 }
 
-exports.findBycode = async (data) => {
+exports.getAllNoPaginate = async (data) => {
+  try {
+    return {
+      data: await Supplier.find({ deletedAt: null })
+    }
+  } catch (error) {
+    throw new ValidationException(error)
+  }
+}
+
+exports.findByCode = async (data) => {
   if (!data?.code) {
     throw new ValidationException("Missing parameter")
   }

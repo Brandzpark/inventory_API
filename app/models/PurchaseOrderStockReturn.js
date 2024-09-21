@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const itemsSchema = mongoose.Schema(
     {
@@ -59,5 +60,7 @@ const purchaseOrderStockReturnSchema = new Schema({
 }, {
     timestamps: true,
 })
+
+purchaseOrderStockReturnSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("purchaseOrderStockReturn", purchaseOrderStockReturnSchema);

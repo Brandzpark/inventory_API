@@ -2,16 +2,47 @@ const PurchaseOrder = require("../models/PurchaseOrder");
 const PurchaseOrderStockReturn = require("../models/PurchaseOrderStockReturn");
 const PurchaseOrderReceived = require("../models/PurchaseOrderReceived");
 const Product = require("../models/Product");
+const Supplier = require("../models/Supplier");
 
 const userResource = require("../resources/userResource");
 const { formatNumberWithPrefix, isPositiveNumber } = require('../helper')
 const { ValidationException } = require("../exceptions");
 const { now, isValidObjectId } = require("mongoose");
 
-exports.getAll = async () => {
+exports.getAll = async (data) => {
+  const page = data?.page ?? 1
+  const search = data?.search ?? ""
+  const regex = new RegExp(search, 'i');
+
+  const purchaseOrderReturns = await PurchaseOrderStockReturn.paginate({
+    deletedAt: null,
+    $or: [
+      { code: regex },
+      { purchaseOrderCode: regex },
+    ]
+  },
+    {
+      lean: true,
+      page,
+      limit: 50,
+    })
+
+
+  const docs = await Promise.all(purchaseOrderReturns?.docs?.map(async (row) => {
+    const purchaseOrder = await PurchaseOrder.findOne({ code: row?.purchaseOrderCode }).lean()
+    const supplier = await Supplier.findOne({ code: purchaseOrder?.supplier?.code }).lean()
+    return {
+      ...row,
+      purchaseOrder,
+      supplier
+    }
+  }))
+
+  purchaseOrderReturns.docs = docs
+
   try {
     return {
-      data: await PurchaseOrderStockReturn.find({ deletedAt: null }),
+      data: purchaseOrderReturns,
     };
   } catch (error) {
     throw new ValidationException(error);
@@ -432,7 +463,7 @@ exports.nextNumber = async () => {
   try {
     const documentCount = await PurchaseOrderStockReturn.countDocuments()
     return {
-      nextNumber: formatNumberWithPrefix(documentCount + 1, "PORS"),
+      nextNumber: formatNumberWithPrefix(documentCount + 1, "POSR"),
     };
   } catch (error) {
     throw new ValidationException(error);

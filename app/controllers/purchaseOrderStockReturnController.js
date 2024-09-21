@@ -9,7 +9,7 @@ const {
 
 exports.getAll = async (req, res, next) => {
     try {
-        const response = await PurchaseOrderStockReturnService.getAll();
+        const response = await PurchaseOrderStockReturnService.getAll(req.query);
         res.status(200).json({
             status: 200,
             success: true,
