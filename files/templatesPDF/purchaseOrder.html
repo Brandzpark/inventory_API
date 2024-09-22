@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Purchase Order {{PO}}</title>
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+        }
+
+        td {
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+        }
+    </style>
+</head>
+
+<body class="text-sm bg-[#F9FAFC] p-[20px]">
+    <header class="flex justify-between items-center">
+        <div>
+            <img id="companyIcon" src="{{apiUrl}}/public/images/companyIcon.png" height="100px" width="200px" />
+            <div class="ml-[3.7rem] text-xs text-[#5E6470]">
+                Distributor for PVC Pipes & Fittings<br>
+                No: 1/635, Chilaw Road Katuneriya<br>
+                Tel: 0777627230 / 0761374560
+            </div>
+        </div>
+        <div class="text-[#5E6470]">
+            <div>Purchase Order</div>
+            <div>15 Aug, 2023 4:18 PM</div>
+        </div>
+    </header>
+    <div class="border rounded-2xl bg-white mt-5 min-h-[83vh] text-xs p-6">
+        <div class="grid grid-cols-2 gap-5">
+            <div class="space-y-4">
+                <div>
+                    <div class="text-[#5E6470] mb-1">Purchases Order number</div>
+                    <div class="font-semibold">{{PO}}</div>
+                </div>
+                <div>
+                    <div class="text-[#5E6470] mb-1">Remark</div>
+                    <div class="font-semibold">{{remark}}</div>
+                </div>
+                <div>
+                    <div class="text-[#5E6470] mb-1">Order date</div>
+                    <div class="font-semibold">{{orderDate}}</div>
+                </div>
+                <div>
+                    <div class="text-[#5E6470] mb-1">Supplier</div>
+                    <div class="font-semibold">{{supplier}}</div>
+                </div>
+            </div>
+            <div class="text-right flex flex-col justify-between h-full">
+                <div>
+                    <div class="text-[#5E6470] mb-1">Total(LKR)</div>
+                    <div class="font-semibold text-2xl text-[#E87117] ">{{total}}</div>
+                </div>
+                <div>
+                    <div class="text-[#5E6470] mb-1">Required date</div>
+                    <div class="font-semibold">{{requiredDate}}</div>
+                </div>
+            </div>
+        </div>
+        <table class="w-full mt-5 text-[#5E6470] text-xs">
+            <thead class="border-t border-b uppercase">
+                <tr>
+                    <td class="py-3">Item Detail</td>
+                    <td class="py-3">Remark</td>
+                    <td class="py-3" align="right">Qty</td>
+                    <td class="py-3" align="right">Rate</td>
+                    <td class="py-3" align="right">Discount</td>
+                    <td class="py-3" align="right">Amount</td>
+                </tr>
+            </thead>
+            <tbody class="border-b text-black">
+                {{items}}
+            </tbody>
+        </table>
+        <div class="grid grid-cols-3 gap-5 mt-2">
+            <div></div>
+            <div></div>
+            <div>
+                <table class="w-full">
+                    <tr>
+                        <td>Subtotal</td>
+                        <td align="right">{{subTotal}}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td>Discount</td>
+                        <td align="right">{{totalDiscount}}</td>
+                    </tr>
+                    <tr class="py-3">
+                        <td class="font-semibold">Total</td>
+                        <td class="font-semibold" align="right">{{total}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -43,6 +43,7 @@ app.use(cors());
 app.use(express.json({ limit: "100mb", extended: true }));
 app.use(fileUpload());
 
+app.use('/public', express.static('public'))
 app.use('/uploads', express.static('uploads'))
 app.use('/permissions', express.static('permissions'))
 
@@ -70,7 +71,7 @@ app.use('/suppliers', authMiddleware, SupplierRoutes)
 app.use('/customers', authMiddleware, CustomerRoutes)
 app.use('/products', authMiddleware, ProductRoutes)
 app.use('/salesRep', authMiddleware, SalesRepRoutes)
-app.use('/purchaseOrder', authMiddleware, PurchaseOrderRoutes)
+app.use('/purchaseOrder', PurchaseOrderRoutes)
 app.use('/purchaseOrderReceived', authMiddleware, PurchaseOrderReceivedRoutes)
 app.use('/purchaseOrderReturnStock', authMiddleware, PurchaseOrderStockReturnRoutes)
 app.use('/invoice', authMiddleware, InvoiceRoutes)

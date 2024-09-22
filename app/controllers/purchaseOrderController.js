@@ -4,6 +4,9 @@ const {
   updateValidationSchema,
   deleteValidationSchema,
 } = require("../validations/purchaseOrderValidation");
+const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('fs');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -85,3 +88,29 @@ exports.nextNumber = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.print = async (req, res, next) => {
+  try {
+    const response = await PurchaseOrderService.print(req.params);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      ...response,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// exports.print = async (req, res, next) => {
+//   try {
+//     const response = await PurchaseOrderService.print();
+//     res.set({
+//       'Content-Type': 'application/pdf',
+//       'Content-Length': response?.pdfBuffer.length,
+//     });
+//     res.end(response?.pdfBuffer)
+//   } catch (error) {
+//     next(error);
+//   }
+// };

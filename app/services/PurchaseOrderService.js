@@ -1,12 +1,17 @@
 const PurchaseOrder = require("../models/PurchaseOrder");
 const Supplier = require("../models/Supplier");
 const Product = require("../models/Product");
+const { apiUrl } = require("../config");
+const moment = require('moment');
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 
 const userResource = require("../resources/userResource");
 const { ValidationException } = require("../exceptions");
 const { now, isValidObjectId } = require("mongoose");
 
-const { formatNumberWithPrefix } = require('../helper')
+const { formatNumberWithPrefix, formatMoney } = require('../helper')
 
 exports.getAll = async (data) => {
   const page = data?.page ?? 1
@@ -276,6 +281,64 @@ exports.nextNumber = async () => {
     const documentCount = await PurchaseOrder.countDocuments()
     return {
       nextNumber: formatNumberWithPrefix(documentCount + 1, "PO"),
+    };
+  } catch (error) {
+    throw new ValidationException(error);
+  }
+}
+
+exports.print = async (data) => {
+  try {
+    const purchaseOrder = await PurchaseOrder.findOne({ code: data?.code }).lean()
+    purchaseOrder.supplier = await Supplier.findOne({ code: purchaseOrder.supplier.code }).lean()
+    const templatePath = path.join('files', 'templatesPDF', 'purchaseOrder.html');
+    const companyImage = path.join('public', 'images', 'companyIcon.png');
+    let htmlContent = fs.readFileSync(templatePath, 'utf-8');
+    const items = purchaseOrder?.items.map(item => {
+      const itemSubtotal = item.quantity * item.rate
+      const itemDiscount = item.discount > 0 ? (itemSubtotal * item.discount) / 100 : 0
+      const itemTotal = itemSubtotal - itemDiscount
+      return (
+        `
+      <tr>
+        <td>
+          <div class="font-medium" >${item.name}</div>
+          <small>
+          ${item.code}
+          </small>
+        </td>
+        <td>${item.remark || "-"}</td>
+        <td align="right" >${item.quantity}</td>
+        <td align="right" >${formatMoney(item.rate)}</td>
+        <td align="right" >${item.discount + "%"}</td>
+        <td align="right" >${formatMoney(itemTotal)}</td>
+      </tr>
+    `
+      )
+    }).join('');
+
+    htmlContent = htmlContent.replace(/{{PO}}/g, purchaseOrder?.code);
+    htmlContent = htmlContent.replace(/{{apiUrl}}/g, apiUrl);
+    htmlContent = htmlContent.replace(/{{supplier}}/g, purchaseOrder?.supplier?.code + " | " + purchaseOrder?.supplier?.name);
+    htmlContent = htmlContent.replace(/{{items}}/g, items);
+    htmlContent = htmlContent.replace(/{{remark}}/g, purchaseOrder?.remark);
+    htmlContent = htmlContent.replace(/{{orderDate}}/g, moment(purchaseOrder?.orderDate).format("YYYY-MM-DD"));
+    htmlContent = htmlContent.replace(/{{requiredDate}}/g, moment(purchaseOrder?.requiredDate).format("YYYY-MM-DD"));
+    htmlContent = htmlContent.replace(/{{subTotal}}/g, formatMoney(purchaseOrder?.subTotal));
+    htmlContent = htmlContent.replace(/{{totalDiscount}}/g, formatMoney(purchaseOrder?.totalDiscount));
+    htmlContent = htmlContent.replace(/{{total}}/g, formatMoney(purchaseOrder?.total));
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    const pdfBuffer = await page.pdf({
+      // path: path.join('files', 'generated', 'text.pdf'),
+      format: 'A4',
+      printBackground: true,
+    });
+    await browser.close();
+    return {
+      pdfBuffer
     };
   } catch (error) {
     throw new ValidationException(error);

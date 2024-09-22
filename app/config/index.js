@@ -1,5 +1,6 @@
 module.exports = {
     port: process.env.PORT ?? 4015,
+    apiUrl: process.env.API_URL ?? "http://localhost:4015",
     key: process.env.KEY ?? "VXNlclByb2plY3RNYW5hZ2VtZW50RW5jcnlwdGlvbg==",
     database: {
         database: process.env.DB_NAME ?? "inventory-system",

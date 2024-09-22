@@ -11,5 +11,8 @@ router.put("/update", PurchaseOrderController.update);
 router.post("/destroy", PurchaseOrderController.delete);
 router.get("/nextNumber", PurchaseOrderController.nextNumber);
 
+router.get("/print/:code", PurchaseOrderController.print);
+
+
 
 module.exports = router
