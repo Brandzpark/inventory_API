@@ -1,4 +1,5 @@
 const PurchaseOrder = require("../models/PurchaseOrder");
+const PurchaseOrderReceived = require("../models/PurchaseOrderReceived");
 const Supplier = require("../models/Supplier");
 const Product = require("../models/Product");
 const { apiUrl } = require("../config");
@@ -50,6 +51,35 @@ exports.getAll = async (data) => {
   }
 };
 
+exports.getAllNoPaginate = async (data) => {
+  try {
+    let purchaseOrders = await PurchaseOrder.find({ deletedAt: null }).lean()
+
+    if (data?.type == "por") {
+      purchaseOrders = purchaseOrders?.filter(row => {
+        const filterItems = row?.items?.filter(itemRow => Number(itemRow?.receivableQuantity) > 0)
+        if (filterItems?.length == 0) {
+          return false
+        }
+        return true
+      })
+    }
+
+    const purchaseOrderMapped = await Promise.all(purchaseOrders?.map(async (row) => {
+      const supplier = await Supplier.findOne({ code: row?.supplier?.code }).lean()
+      return {
+        ...row,
+        supplier
+      }
+    }))
+    return {
+      data: purchaseOrderMapped
+    }
+  } catch (error) {
+    throw new ValidationException(error)
+  }
+}
+
 exports.findByCode = async (data) => {
   if (!data?.code) {
     throw new ValidationException("Missing parameter");
@@ -58,6 +88,9 @@ exports.findByCode = async (data) => {
   const purchaseOrder = await PurchaseOrder.findOne({ code: data?.code, deletedAt: null }).lean()
   if (!purchaseOrder) {
     throw new ValidationException("Purchase Order not found");
+  }
+  if (purchaseOrder?.isReceiveCreated) {
+    throw new ValidationException("Unable To Update Purchase Order Receive(s) Created");
   }
   purchaseOrder.supplier = await Supplier.findOne({ code: purchaseOrder?.supplier?.code })
   try {
@@ -105,6 +138,7 @@ exports.create = async (req, user) => {
       ...row,
       name: product?.name,
       discountAmount,
+      receivableQuantity: row?.quantity,
       subTotal,
       total: subTotal - discountAmount,
     };
@@ -192,6 +226,7 @@ exports.update = async (req, user) => {
       ...row,
       name: product?.name,
       discountAmount,
+      receivableQuantity: row?.quantity,
       subTotal,
       total: subTotal - discountAmount,
     };

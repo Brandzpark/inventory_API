@@ -5,7 +5,7 @@ const PurchaseOrderReceivedController = require('../controllers/purchaseOrderRec
 
 
 router.get("/all", PurchaseOrderReceivedController.getAll);
-router.get("/findById/:id", PurchaseOrderReceivedController.findById);
+router.get("/findByCode/:code", PurchaseOrderReceivedController.findByCode);
 router.post("/create", PurchaseOrderReceivedController.create);
 router.put("/update", PurchaseOrderReceivedController.update);
 router.post("/destroy", PurchaseOrderReceivedController.delete);

@@ -17,6 +17,10 @@ const itemsSchema = mongoose.Schema(
       type: String,
       default: "1",
     },
+    receivableQuantity: {
+      type: String,
+      default: "1",
+    },
     rate: {
       type: String,
       default: "0",
@@ -87,6 +91,10 @@ const purchaseOrderSchema = new Schema(
     },
     total: {
       type: String,
+    },
+    isReceiveCreated: {
+      type: Boolean,
+      default: false
     },
     deletedAt: {
       type: Date,

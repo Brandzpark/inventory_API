@@ -46,18 +46,23 @@ exports.getAll = async (data) => {
   }
 };
 
-exports.findById = async (data) => {
-  if (!data?.id) {
+exports.findByCode = async (data) => {
+  if (!data?.code) {
     throw new ValidationException("Missing parameter");
   }
 
-  if (!isValidObjectId(data?.id)) {
-    throw new ValidationException("Invalid object ID");
+  const purchaseOrderReceived = await PurchaseOrderReceived.findOne({ code: data?.code, deletedAt: null }).lean()
+  if (!purchaseOrderReceived) {
+    throw new ValidationException("Purchase Order Receive not found");
   }
+
+  const purchaseOrder = await PurchaseOrder.findOne({ code: purchaseOrderReceived?.purchaseOrderCode }).lean()
+  purchaseOrder['supplier'] = await Supplier.findOne({ code: purchaseOrder?.supplier.code }).lean()
+  purchaseOrderReceived['purchaseOrder'] = purchaseOrder
 
   try {
     return {
-      data: await PurchaseOrderReceived.findOne({ _id: data?.id, deletedAt: null }),
+      data: purchaseOrderReceived
     };
   } catch (error) {
     throw new ValidationException(error);
@@ -104,36 +109,11 @@ exports.create = async (req, user) => {
 
   history.push(historyItem);
 
-  const subTotal = req?.items?.reduce((acc, curr) => {
-    return acc + parseFloat(curr?.receivedQuantity) * parseFloat(curr?.amount);
-  }, 0);
-
-  const totalDiscount = (subTotal * req?.discount) / 100;
-
   for (let index = 0; index < req.items.length; index++) {
     const requestItem = req.items[index];
-    const orderedQuantity = requestItem?.orderedQuantity;
-    const currentCreatedReceived = await PurchaseOrderReceived.find({ purchaseOrderCode: req?.purchaseOrderCode }).lean()
-    let itemReceivedExist = [];
-    currentCreatedReceived?.map((row) =>
-      row?.items?.find((itemRow) => {
-        if (itemRow?.code === requestItem?.code) {
-          itemReceivedExist.push(itemRow);
-        }
-      })
-    );
+    const purchaseOrderItem = purchaseOrder?.items?.find(row => row?.code == requestItem?.code)
 
-    const currentTotalReceivedQuantity = itemReceivedExist?.reduce(
-      (acc, curr) => {
-        return acc + parseFloat(curr?.receivedQuantity);
-      },
-      0
-    );
-
-    const newTotal =
-      currentTotalReceivedQuantity + parseFloat(requestItem?.receivedQuantity);
-
-    if (orderedQuantity < newTotal) {
+    if (Number(purchaseOrderItem?.receivableQuantity) < Number(requestItem?.receivedQuantity)) {
       errorObject = {
         ...errorObject,
         [`items.${index}.code`]:
@@ -145,17 +125,23 @@ exports.create = async (req, user) => {
     throw new ValidationException(errorObject);
   }
 
+  const tempPoItems = [...purchaseOrder?.items]
 
   //Add stock to product
   for (let index = 0; index < req.items.length; index++) {
-    const purchaseOrderReceiveItem = req.items[index];
-    const product = await Product.findOne({ code: purchaseOrderReceiveItem.code }).lean()
+    const requestItem = req.items[index];
+    const purchaseOrderItem = purchaseOrder?.items?.find(row => row?.code == requestItem?.code)
+    const purchaseOrderItemIndex = purchaseOrder?.items?.findIndex(row => row?.code == requestItem?.code)
+    tempPoItems.splice(purchaseOrderItemIndex, 1, { ...purchaseOrderItem, receivableQuantity: String(Number(purchaseOrderItem?.receivableQuantity) - Number(requestItem?.receivedQuantity)) })
+    purchaseOrder.items = tempPoItems
+
+    const product = await Product.findOne({ code: requestItem.code }).lean()
     if (product) {
       const historyData = [...product.history]
       const newHistoryItem = {
         event: `Purchase Order Receive Create ${req?.code}`,
         type: "add",
-        quantity: purchaseOrderReceiveItem?.receivedQuantity,
+        quantity: requestItem?.receivedQuantity,
         user: userResource.logResource(user),
         stockAdjustment: null,
         timestamps: now()
@@ -167,7 +153,7 @@ exports.create = async (req, user) => {
       const warehouseItem = warehouseQuantity?.find(row => row?.warehouse == "Default")
       let newItem = {
         ...warehouseItem,
-        quantity: parseFloat(warehouseItem?.quantity) + parseFloat(purchaseOrderReceiveItem?.receivedQuantity)
+        quantity: parseFloat(warehouseItem?.quantity) + parseFloat(requestItem?.receivedQuantity)
       }
       warehouseQuantity.splice(findIndex, 1, newItem)
 
@@ -184,14 +170,23 @@ exports.create = async (req, user) => {
     }
   }
 
+  const subTotal = req?.items?.reduce((acc, curr) => {
+    return acc + parseFloat(curr?.receivedQuantity) * parseFloat(curr?.rate);
+  }, 0);
+
+  const totalDiscount = req?.items?.reduce((acc, curr) => {
+    const itemSubtoal =
+      parseFloat(curr?.receivedQuantity || 0) * parseFloat(curr?.rate);
+    return acc + (itemSubtoal * parseFloat(curr?.discount)) / 100;
+  }, 0);
+
 
   const requestData = {
     code: req?.code,
     purchaseOrderCode: req?.purchaseOrderCode,
     receivedDate: req?.receivedDate,
-    remark: req?.remark,
+    remark: req?.remark ?? "",
     items: req?.items,
-    discount: req?.discount,
     totalDiscount: totalDiscount,
     subTotal,
     total: subTotal - totalDiscount,
@@ -203,6 +198,8 @@ exports.create = async (req, user) => {
       {
         $set: {
           history: history,
+          items: purchaseOrder.items,
+          isReceiveCreated: true
         },
       },
       { new: true }
@@ -227,6 +224,14 @@ exports.update = async (req, user) => {
     errorObject = { ...errorObject, code: "Invalid Purchase order" };
   }
 
+  const purchaseOrderReceived = await PurchaseOrderReceived.findOne({
+    code: req?.code,
+  }).lean();
+
+  if (!purchaseOrderReceived) {
+    errorObject = { ...errorObject, code: "Invalid Purchase order received" };
+  }
+
   if (Object.keys(errorObject)?.length > 0) {
     throw new ValidationException(errorObject);
   }
@@ -242,35 +247,20 @@ exports.update = async (req, user) => {
   history.push(historyItem);
 
   const subTotal = req?.items?.reduce((acc, curr) => {
-    return acc + parseFloat(curr?.receivedQuantity) * parseFloat(curr?.amount);
+    return acc + parseFloat(curr?.receivedQuantity) * parseFloat(curr?.rate);
   }, 0);
 
-  const totalDiscount = (subTotal * req?.discount) / 100;
+  const totalDiscount = req?.items?.reduce((acc, curr) => {
+    const itemSubtoal =
+      parseFloat(curr?.receivedQuantity || 0) * parseFloat(curr?.rate);
+    return acc + (itemSubtoal * parseFloat(curr?.discount)) / 100;
+  }, 0);
 
   for (let index = 0; index < req.items.length; index++) {
     const requestItem = req.items[index];
-    const orderedQuantity = requestItem?.orderedQuantity;
-    const currentCreatedReceived = await PurchaseOrderReceived.find({ purchaseOrderCode: req?.purchaseOrderCode, code: { $ne: req.code } }).lean()
-    let itemReceivedExist = [];
-    currentCreatedReceived?.map((row) =>
-      row?.items?.find((itemRow) => {
-        if (itemRow?.code === requestItem?.code) {
-          itemReceivedExist.push(itemRow);
-        }
-      })
-    );
-
-    const currentTotalReceivedQuantity = itemReceivedExist?.reduce(
-      (acc, curr) => {
-        return acc + parseFloat(curr?.receivedQuantity);
-      },
-      0
-    );
-
-    const newTotal =
-      currentTotalReceivedQuantity + parseFloat(requestItem?.receivedQuantity);
-
-    if (orderedQuantity < newTotal) {
+    const oldpurchaseOrderReceivedItem = purchaseOrderReceived?.items?.find(row => row?.code == requestItem?.code)
+    const purchaseOrderItem = purchaseOrder?.items?.find(row => row?.code == requestItem?.code)
+    if (Number(purchaseOrderItem?.receivableQuantity + oldpurchaseOrderReceivedItem?.receivedQuantity) < Number(requestItem?.receivedQuantity)) {
       errorObject = {
         ...errorObject,
         [`items.${index}.code`]:
@@ -281,52 +271,57 @@ exports.update = async (req, user) => {
   if (Object.keys(errorObject)?.length > 0) {
     throw new ValidationException(errorObject);
   }
+  const tempPoItems = [...purchaseOrder?.items]
 
   //Add stock to product
   for (let index = 0; index < req.items.length; index++) {
     const purchaseOrderReceiveItem = req.items[index];
+    const oldpurchaseOrderReceivedItem = purchaseOrderReceived?.items?.find(row => row?.code == purchaseOrderReceiveItem?.code)
+    const purchaseOrderItem = purchaseOrder?.items?.find(row => row?.code == purchaseOrderReceiveItem?.code)
+    const purchaseOrderItemIndex = purchaseOrder?.items?.findIndex(row => row?.code == purchaseOrderReceiveItem?.code)
+
+    const newQty = String(Number(purchaseOrderItem?.receivableQuantity + oldpurchaseOrderReceivedItem?.receivedQuantity) - Number(purchaseOrderReceiveItem?.receivedQuantity))
+
+    tempPoItems.splice(purchaseOrderItemIndex, 1, { ...purchaseOrderItem, receivableQuantity: newQty })
+    purchaseOrder.items = tempPoItems
+
     const product = await Product.findOne({ code: purchaseOrderReceiveItem.code }).lean()
     if (product) {
-      const currentPurchaseOrderReceive = await PurchaseOrderReceived.findOne({ code: req?.code }).lean()
-      const currentPurchaseOrderReceiveItem = currentPurchaseOrderReceive?.items?.find(row => row?.code === purchaseOrderReceiveItem?.code)
 
       const warehouseQuantity = [...product.warehouseQuantity]
       const findIndex = warehouseQuantity?.findIndex(row => row?.warehouse == "Default")
       const warehouseItem = warehouseQuantity?.find(row => row?.warehouse == "Default")
 
-      const quantityDifference = parseFloat(purchaseOrderReceiveItem?.receivedQuantity) - parseFloat(currentPurchaseOrderReceiveItem?.receivedQuantity)
-      if (quantityDifference != 0) {
-        const isPositive = isPositiveNumber(quantityDifference)
-        let positiveNumber = Math.abs(quantityDifference);
-        const historyData = [...product.history]
-        const newHistoryItem = {
-          event: `Purchase Order Receive Update ${req?.code}`,
-          type: isPositive ? "add" : "remove",
-          quantity: positiveNumber,
-          user: userResource.logResource(user),
-          stockAdjustment: null,
-          timestamps: now()
-        }
-        historyData.push(newHistoryItem)
-
-
-        let newItem = {
-          ...warehouseItem,
-          quantity: parseFloat(warehouseItem?.quantity) + parseFloat(quantityDifference)
-        }
-        warehouseQuantity.splice(findIndex, 1, newItem)
-
-        await Product.findByIdAndUpdate(
-          product?._id,
-          {
-            $set: {
-              warehouseQuantity: warehouseQuantity,
-              history: historyData
-            },
-          },
-          { new: true }
-        );
+      const isPositive = isPositiveNumber(newQty)
+      let positiveNumber = Math.abs(newQty);
+      const historyData = [...product.history]
+      const newHistoryItem = {
+        event: `Purchase Order Receive Update ${req?.code}`,
+        type: isPositive ? "add" : "remove",
+        quantity: positiveNumber,
+        user: userResource.logResource(user),
+        stockAdjustment: null,
+        timestamps: now()
       }
+      historyData.push(newHistoryItem)
+
+
+      let newItem = {
+        ...warehouseItem,
+        quantity: parseFloat(warehouseItem?.quantity - oldpurchaseOrderReceivedItem?.receivedQuantity) + Number(purchaseOrderReceiveItem?.receivedQuantity)
+      }
+      warehouseQuantity.splice(findIndex, 1, newItem)
+
+      await Product.findByIdAndUpdate(
+        product?._id,
+        {
+          $set: {
+            warehouseQuantity: warehouseQuantity,
+            history: historyData
+          },
+        },
+        { new: true }
+      );
 
     }
   }
