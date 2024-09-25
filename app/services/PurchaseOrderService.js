@@ -363,17 +363,19 @@ exports.print = async (data) => {
     htmlContent = htmlContent.replace(/{{totalDiscount}}/g, formatMoney(purchaseOrder?.totalDiscount));
     htmlContent = htmlContent.replace(/{{total}}/g, formatMoney(purchaseOrder?.total));
 
-    // const browser = await puppeteer.launch();
-    // const page = await browser.newPage();
-    // await page.setContent(htmlContent);
-    // const pdfBuffer = await page.pdf({
-    //   // path: path.join('files', 'generated', 'text.pdf'),
-    //   format: 'A4',
-    //   printBackground: true,
-    // });
-    // await browser.close();
+    const browser = await puppeteer.launch({
+      ignoreDefaultArgs: ['--disable-extensions'],
+    });
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    const pdfBuffer = await page.pdf({
+      // path: path.join('files', 'generated', 'text.pdf'),
+      format: 'A4',
+      printBackground: true,
+    });
+    await browser.close();
     return {
-      htmlContent
+      pdfBuffer
     };
   } catch (error) {
     throw new ValidationException(error);
