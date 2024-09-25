@@ -132,7 +132,14 @@ exports.create = async (req, user) => {
     const requestItem = req.items[index];
     const purchaseOrderItem = purchaseOrder?.items?.find(row => row?.code == requestItem?.code)
     const purchaseOrderItemIndex = purchaseOrder?.items?.findIndex(row => row?.code == requestItem?.code)
-    tempPoItems.splice(purchaseOrderItemIndex, 1, { ...purchaseOrderItem, receivableQuantity: String(Number(purchaseOrderItem?.receivableQuantity) - Number(requestItem?.receivedQuantity)) })
+
+    const newQuantity = String(Number(purchaseOrderItem?.receivableQuantity) - Number(requestItem?.receivedQuantity))
+
+    tempPoItems.splice(purchaseOrderItemIndex, 1, {
+      ...purchaseOrderItem,
+      receivableQuantity: newQuantity,
+      returnableQuantity: Number(purchaseOrderItem?.returnableQuantity) + Number(requestItem?.receivedQuantity)
+    })
     purchaseOrder.items = tempPoItems
 
     const product = await Product.findOne({ code: requestItem.code }).lean()
@@ -179,7 +186,6 @@ exports.create = async (req, user) => {
       parseFloat(curr?.receivedQuantity || 0) * parseFloat(curr?.rate);
     return acc + (itemSubtoal * parseFloat(curr?.discount)) / 100;
   }, 0);
-
 
   const requestData = {
     code: req?.code,
@@ -280,9 +286,13 @@ exports.update = async (req, user) => {
     const purchaseOrderItem = purchaseOrder?.items?.find(row => row?.code == purchaseOrderReceiveItem?.code)
     const purchaseOrderItemIndex = purchaseOrder?.items?.findIndex(row => row?.code == purchaseOrderReceiveItem?.code)
 
-    const newQty = String(Number(purchaseOrderItem?.receivableQuantity + oldpurchaseOrderReceivedItem?.receivedQuantity) - Number(purchaseOrderReceiveItem?.receivedQuantity))
+    const newQty = String(Number(purchaseOrderItem?.receivableQuantity) + Number(oldpurchaseOrderReceivedItem?.receivedQuantity) - Number(purchaseOrderReceiveItem?.receivedQuantity))
 
-    tempPoItems.splice(purchaseOrderItemIndex, 1, { ...purchaseOrderItem, receivableQuantity: newQty })
+    tempPoItems.splice(purchaseOrderItemIndex, 1, {
+      ...purchaseOrderItem,
+      receivableQuantity: newQty,
+      returnableQuantity: (Number(purchaseOrderItem?.returnableQuantity) - Number(oldpurchaseOrderReceivedItem?.receivedQuantity)) + Number(purchaseOrderReceiveItem?.receivedQuantity)
+    })
     purchaseOrder.items = tempPoItems
 
     const product = await Product.findOne({ code: purchaseOrderReceiveItem.code }).lean()
@@ -322,7 +332,6 @@ exports.update = async (req, user) => {
         },
         { new: true }
       );
-
     }
   }
 
@@ -345,6 +354,7 @@ exports.update = async (req, user) => {
       {
         $set: {
           history: history,
+          items: purchaseOrder.items
         },
       },
       { new: true }

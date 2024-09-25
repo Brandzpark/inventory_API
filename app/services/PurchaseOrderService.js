@@ -80,7 +80,7 @@ exports.getAllNoPaginate = async (data) => {
   }
 }
 
-exports.findByCode = async (data) => {
+exports.findByCode = async (data, query) => {
   if (!data?.code) {
     throw new ValidationException("Missing parameter");
   }
@@ -89,7 +89,7 @@ exports.findByCode = async (data) => {
   if (!purchaseOrder) {
     throw new ValidationException("Purchase Order not found");
   }
-  if (purchaseOrder?.isReceiveCreated) {
+  if (query?.type == "update" && purchaseOrder?.isReceiveCreated) {
     throw new ValidationException("Unable To Update Purchase Order Receive(s) Created");
   }
   purchaseOrder.supplier = await Supplier.findOne({ code: purchaseOrder?.supplier?.code })

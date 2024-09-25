@@ -19,7 +19,11 @@ const itemsSchema = mongoose.Schema(
     },
     receivableQuantity: {
       type: String,
-      default: "1",
+      default: "0",
+    },
+    returnableQuantity: {
+      type: String,
+      default: "0",
     },
     rate: {
       type: String,

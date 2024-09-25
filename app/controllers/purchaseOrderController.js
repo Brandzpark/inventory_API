@@ -37,7 +37,7 @@ exports.getAllNoPaginate = async (req, res, next) => {
 
 exports.findByCode = async (req, res, next) => {
   try {
-    const response = await PurchaseOrderService.findByCode(req.params);
+    const response = await PurchaseOrderService.findByCode(req.params, req.query);
     res.status(200).json({
       status: 200,
       success: true,

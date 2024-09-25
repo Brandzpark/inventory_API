@@ -463,7 +463,7 @@ exports.nextNumber = async () => {
   try {
     const documentCount = await PurchaseOrderStockReturn.countDocuments()
     return {
-      nextNumber: formatNumberWithPrefix(documentCount + 1, "POSR"),
+      nextNumber: formatNumberWithPrefix(documentCount + 1, "PSR"),
     };
   } catch (error) {
     throw new ValidationException(error);
